@@ -73,29 +73,18 @@
 
 ---
 
-## 🗂️ 專案結構導覽
+## 🗂️ 文件組織結構
+
+文件按照學習路徑和專業領域進行組織：
 
 ```
-fridge_temp_controller_sky130/
-├── docs/                    # 您在這裡 📍
-│   ├── 01_getting_started/  # 入門指南
-│   ├── 02_design/          # 設計文件
-│   ├── 03_verification/    # 驗證文件
-│   ├── 04_tutorials/       # 教學材料
-│   ├── 05_implementation/  # 實作指南
-│   └── 06_reference/       # 參考資源
-├── rtl/                    # Verilog 源碼
-│   ├── temp_ctrl_top.v     # 頂層模組
-│   ├── pid_controller.v    # PID 控制器
-│   ├── adc_spi_interface.v # SPI 介面
-│   └── ...
-├── testbench/             # 測試檔案
-│   ├── temp_ctrl_top_tb.v
-│   ├── pid_controller_tb.v
-│   └── Makefile
-├── synthesis/             # Yosys 合成
-├── openlane/             # OpenLane 配置
-└── scripts/              # 輔助腳本
+docs/
+├── 01_getting_started/  # 🌱 入門指南 - 從這裡開始
+├── 02_design/          # 🎨 設計文件 - 架構與 RTL
+├── 03_verification/    # 🧪 驗證文件 - 測試與除錯
+├── 04_tutorials/       # 📚 教學材料 - 深入學習
+├── 05_implementation/  # 🏭 實作指南 - 合成與 PnR
+└── 06_reference/       # 📖 參考資源 - 術語與連結
 ```
 
 ---
@@ -105,11 +94,11 @@ fridge_temp_controller_sky130/
 ### 1. 環境設置
 ```bash
 # 克隆專案
-git clone <repository-url>
+git clone git@github.com:marcus888-techstack/test-fridge_temp_controller_sky130.git
 cd fridge_temp_controller_sky130
 
-# 安裝相依套件
-./scripts/setup_env.sh
+# 執行快速開始腳本
+./quickstart.sh
 ```
 
 ### 2. 執行模擬
@@ -161,8 +150,9 @@ make all
 ## 📧 聯絡資訊
 
 - 專案維護者：IC Design Team
-- 問題回報：[GitHub Issues](https://github.com/...)
-- 討論區：[Discussions](https://github.com/...)
+- 專案儲存庫：[GitHub](https://github.com/marcus888-techstack/test-fridge_temp_controller_sky130)
+- 問題回報：[GitHub Issues](https://github.com/marcus888-techstack/test-fridge_temp_controller_sky130/issues)
+- 討論區：[Discussions](https://github.com/marcus888-techstack/test-fridge_temp_controller_sky130/discussions)
 
 ---
 
@@ -175,4 +165,4 @@ make all
 
 ---
 
-最後更新：2024-12-19 | 版本：1.0
+最後更新：2025-07-24 | 版本：1.0.1

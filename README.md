@@ -23,34 +23,33 @@
 
 ```
 fridge_temp_controller_sky130/
-├── docs/                 # 設計文檔
-│   ├── 00_design_introduction_for_beginners.md  # 🆕 新手入門指南
-│   ├── 01_specification.md
-│   ├── 02_architecture.md
-│   ├── 03_tutorial.md
-│   ├── 04_design_decisions.md
-│   ├── 05_rtl_implementation.md
-│   ├── 06_verification_strategy.md
-│   ├── 07_physical_design_guide.md
-│   └── 08_troubleshooting.md
-├── rtl/                  # RTL 設計檔案
-│   ├── temp_ctrl_top.v
-│   ├── adc_spi_interface.v
-│   ├── pid_controller.v
-│   ├── pwm_generator.v
-│   └── display_controller.v
-├── testbench/           # 測試平台
+├── docs/                    # 📚 完整設計文檔
+│   ├── 01_getting_started/  # 入門指南
+│   ├── 02_design/          # 設計文件
+│   ├── 03_verification/    # 驗證文件
+│   ├── 04_tutorials/       # 教學材料
+│   ├── 05_implementation/  # 實作指南
+│   └── 06_reference/       # 參考資源
+├── rtl/                    # RTL 設計檔案
+│   ├── temp_ctrl_top.v     # 頂層模組
+│   ├── adc_spi_interface.v # ADC SPI 介面
+│   ├── pid_controller.v    # PID 控制器
+│   ├── pwm_generator.v     # PWM 產生器
+│   └── display_controller.v # 顯示控制器
+├── testbench/             # 測試平台
 │   ├── temp_ctrl_top_tb.v
 │   ├── pid_controller_tb.v
 │   └── Makefile
-├── synthesis/           # 合成腳本
+├── synthesis/             # 合成腳本
 │   ├── synth_top.ys
-│   └── constraints.sdc
-├── openlane/           # OpenLane 配置
+│   ├── constraints.sdc
+│   └── run_synthesis.sh
+├── openlane/             # OpenLane 配置
 │   ├── config.json
 │   ├── base.sdc
-│   └── pdn.tcl
-└── results/            # 輸出結果
+│   ├── pdn.tcl
+│   └── run_openlane.sh
+└── quickstart.sh         # 快速開始腳本
 ```
 
 ## 🚀 快速開始
@@ -86,7 +85,7 @@ make
 
 4. **克隆專案**
 ```bash
-git clone [your-repo-url]
+git clone git@github.com:marcus888-techstack/test-fridge_temp_controller_sky130.git
 cd fridge_temp_controller_sky130
 ```
 
@@ -147,19 +146,17 @@ cd openlane
 
 ## 📝 文檔
 
-### 入門文檔
-- [🆕 新手入門指南](docs/00_design_introduction_for_beginners.md) - **從這裡開始！**
-- [系統規格書](docs/01_specification.md)
-- [架構設計](docs/02_architecture.md)
-- [完整教學](docs/03_tutorial.md)
+完整的專案文檔已經按照學習路徑和專業領域進行組織。請訪問 [📚 文檔中心](docs/README.md) 查看：
 
-### 進階文檔
-- [設計決策說明](docs/04_design_decisions.md)
-- [RTL 實作細節](docs/05_rtl_implementation.md)
-- [驗證策略](docs/06_verification_strategy.md)
-- [物理設計指南](docs/07_physical_design_guide.md)
-- [問題排除指南](docs/08_troubleshooting.md)
-- [🔍 GTKWave 與 Testbench 使用指南](docs/09_gtkwave_testbench_guide.md) - **驗證必讀！**
+- 🌱 **初學者路徑** - 從系統規格到 SPI 教學的循序漸進學習
+- 🔧 **設計工程師路徑** - RTL 實作、架構設計與驗證策略
+- 🏗️ **物理設計路徑** - 合成、OpenLane 流程與 PDK 使用指南
+
+### 快速連結
+- [新手入門指南](docs/01_getting_started/00_design_introduction_for_beginners.md)
+- [系統規格書](docs/01_getting_started/01_system_specification.md)
+- [SPI 深入教學](docs/04_tutorials/02_understanding_spi.md)
+- [GTKWave 驗證指南](docs/03_verification/02_gtkwave_testbench_guide.md)
 
 ## 🧪 測試覆蓋率
 
@@ -216,8 +213,9 @@ cd openlane
 ## 📞 聯絡資訊
 
 - 專案維護者：IC Design Team
-- Email：[your-email]
-- 專案連結：[your-repo-url]
+- 專案儲存庫：[GitHub](https://github.com/marcus888-techstack/test-fridge_temp_controller_sky130)
+- 問題回報：[GitHub Issues](https://github.com/marcus888-techstack/test-fridge_temp_controller_sky130/issues)
+- 討論區：[GitHub Discussions](https://github.com/marcus888-techstack/test-fridge_temp_controller_sky130/discussions)
 
 ---
 
