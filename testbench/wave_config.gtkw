@@ -1,0 +1,90 @@
+[*]
+[*] GTKWave Analyzer v3.3.100 (w)2019-06-28
+[*] Temperature Controller Waveform Configuration
+[*]
+[dumpfile] "temp_ctrl_top_tb.vcd"
+[dumpfile_mtime] "Thu Dec 19 12:00:00 2024"
+[dumpfile_size] 1000000
+[savefile] "wave_config.gtkw"
+[timestart] 0
+[size] 1920 1080
+[pos] -1 -1
+*-20.000000 1000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] temp_ctrl_top_tb.
+[treeopen] temp_ctrl_top_tb.DUT.
+[sst_width] 230
+[signals_width] 250
+[sst_expanded] 1
+[sst_vpaned_height] 300
+@28
+temp_ctrl_top_tb.clk
+temp_ctrl_top_tb.rst_n
+@200
+-
+-System State
+@28
+temp_ctrl_top_tb.DUT.current_state[2:0]
+@200
+-
+-Temperature Signals
+@420
+temp_ctrl_top_tb.temperature_celsius
+@22
+temp_ctrl_top_tb.DUT.temp_current[15:0]
+temp_ctrl_top_tb.DUT.temp_setpoint[15:0]
+@200
+-
+-ADC Interface
+@28
+temp_ctrl_top_tb.adc_cs_n
+temp_ctrl_top_tb.adc_sclk
+temp_ctrl_top_tb.adc_mosi
+temp_ctrl_top_tb.adc_miso
+@22
+temp_ctrl_top_tb.adc_value[11:0]
+@28
+temp_ctrl_top_tb.DUT.adc_valid
+@200
+-
+-PID Controller
+@22
+temp_ctrl_top_tb.DUT.u_pid.error[15:0]
+temp_ctrl_top_tb.DUT.u_pid.p_term[15:0]
+temp_ctrl_top_tb.DUT.u_pid.i_term[15:0]
+temp_ctrl_top_tb.DUT.u_pid.d_term[15:0]
+temp_ctrl_top_tb.DUT.pid_output[15:0]
+@200
+-
+-PWM Output
+@22
+temp_ctrl_top_tb.DUT.pwm_duty_cycle[9:0]
+@28
+temp_ctrl_top_tb.compressor_pwm
+temp_ctrl_top_tb.DUT.compressor_enable
+@200
+-
+-User Interface
+@28
+temp_ctrl_top_tb.button_up
+temp_ctrl_top_tb.button_down
+temp_ctrl_top_tb.button_mode
+temp_ctrl_top_tb.door_sensor
+@200
+-
+-Display
+@22
+temp_ctrl_top_tb.seven_seg[6:0]
+temp_ctrl_top_tb.digit_sel[3:0]
+@28
+temp_ctrl_top_tb.status_led[2:0]
+@200
+-
+-Alarms and Control
+@28
+temp_ctrl_top_tb.alarm
+temp_ctrl_top_tb.defrost_heater
+@22
+temp_ctrl_top_tb.DUT.defrost_timer[31:0]
+temp_ctrl_top_tb.DUT.door_timer[31:0]
+[pattern_trace] 1
+[pattern_trace] 0

@@ -1,0 +1,81 @@
+{
+    "DESIGN_NAME": "temp_ctrl_top",
+    "VERILOG_FILES": [
+        "dir::../rtl/temp_ctrl_top.v",
+        "dir::../rtl/adc_spi_interface.v",
+        "dir::../rtl/pid_controller.v",
+        "dir::../rtl/pwm_generator.v",
+        "dir::../rtl/display_controller.v"
+    ],
+    "CLOCK_PERIOD": 100,
+    "CLOCK_PORT": "clk",
+    "CLOCK_NET": "clk",
+    "DESIGN_IS_CORE": true,
+    
+    "FP_SIZING": "absolute",
+    "DIE_AREA": "0 0 500 500",
+    "CORE_AREA": "10 10 490 490",
+    "FP_CORE_UTIL": 40,
+    "FP_ASPECT_RATIO": 1,
+    
+    "PL_TARGET_DENSITY": 0.5,
+    "PL_BASIC_PLACEMENT": false,
+    "PL_SKIP_INITIAL_PLACEMENT": false,
+    
+    "ROUTING_CORES": 4,
+    "GLB_RT_ADJUSTMENT": 0.1,
+    "GLB_RT_MAX_DIODE_INS_ITERS": 5,
+    
+    "SYNTH_STRATEGY": "AREA 0",
+    "SYNTH_USE_PG_PINS_DEFINES": "USE_POWER_PINS",
+    "SYNTH_BUFFERING": true,
+    "SYNTH_SIZING": true,
+    "SYNTH_NO_FLAT": false,
+    
+    "CTS_TARGET_SKEW": 10,
+    "CTS_TOLERANCE": 50,
+    "CTS_CLK_BUFFER_LIST": "sky130_fd_sc_hd__clkbuf_4 sky130_fd_sc_hd__clkbuf_8",
+    "CTS_ROOT_BUFFER": "sky130_fd_sc_hd__clkbuf_16",
+    
+    "MAGIC_DRC_USE_GDS": true,
+    "MAGIC_EXT_USE_GDS": true,
+    
+    "VDD_NETS": "vccd1",
+    "GND_NETS": "vssd1",
+    
+    "PDN_CFG": "dir::pdn.tcl",
+    
+    "DIODE_INSERTION_STRATEGY": 4,
+    "RUN_CVC": true,
+    "RUN_MAGIC": true,
+    "RUN_KLAYOUT": true,
+    "RUN_SPICE_EXTRACTION": true,
+    "RUN_MAGIC_DRC": true,
+    "RUN_KLAYOUT_DRC": true,
+    "RUN_LVS": true,
+    
+    "BASE_SDC_FILE": "dir::base.sdc",
+    
+    "PL_RESIZER_DESIGN_OPTIMIZATIONS": true,
+    "PL_RESIZER_TIMING_OPTIMIZATIONS": true,
+    "GLB_RESIZER_TIMING_OPTIMIZATIONS": true,
+    "PL_RESIZER_BUFFER_OUTPUT_PORTS": true,
+    
+    "FP_PDN_ENABLE_RAILS": true,
+    "FP_PDN_VPITCH": 50,
+    "FP_PDN_HPITCH": 50,
+    "FP_PDN_VWIDTH": 1.6,
+    "FP_PDN_HWIDTH": 1.6,
+    
+    "QUIT_ON_TIMING_VIOLATIONS": false,
+    "QUIT_ON_MAGIC_DRC": false,
+    "QUIT_ON_LVS_ERROR": false,
+    
+    "EXTRA_LEFS": [],
+    "EXTRA_GDS_FILES": [],
+    
+    "LVS_CONNECT_BY_LABEL": true,
+    "MAGIC_CONVERT_DRC_TO_RDB": true,
+    "KLAYOUT_XOR_GDS": true,
+    "KLAYOUT_XOR_XML": true
+}

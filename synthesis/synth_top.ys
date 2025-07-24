@@ -1,0 +1,79 @@
+# ==============================================================================
+# File: synth_top.ys
+# Description: Yosys synthesis script for temperature controller
+# Target: SKY130 PDK
+# Author: IC Design Team
+# Date: 2024-12-19
+# ==============================================================================
+
+# Display banner
+echo "============================================="
+echo "Temperature Controller Synthesis"
+echo "Target: SKY130 PDK"
+echo "============================================="
+
+# Read liberty file for SKY130
+# Note: Path needs to be updated based on actual PDK installation
+read_liberty -lib ../libs/sky130_fd_sc_hd__tt_025C_1v80.lib
+
+# Read design files
+echo "Reading RTL files..."
+read_verilog ../rtl/temp_ctrl_top.v
+read_verilog ../rtl/adc_spi_interface.v
+read_verilog ../rtl/pid_controller.v
+read_verilog ../rtl/pwm_generator.v
+read_verilog ../rtl/display_controller.v
+
+# Elaborate design hierarchy
+echo "Elaborating design..."
+hierarchy -check -top temp_ctrl_top
+
+# Generic synthesis
+echo "Running synthesis..."
+synth -top temp_ctrl_top
+
+# Flatten design for optimization
+flatten
+
+# Run optimization passes
+echo "Optimizing design..."
+opt_expr
+opt_clean
+opt -full
+
+# Technology mapping for SKY130
+echo "Technology mapping..."
+dfflibmap -liberty ../libs/sky130_fd_sc_hd__tt_025C_1v80.lib
+abc -liberty ../libs/sky130_fd_sc_hd__tt_025C_1v80.lib -constr constraints.sdc
+clean
+
+# Additional optimization after mapping
+opt_clean -purge
+
+# Generate reports
+echo "Generating reports..."
+tee -o reports/synth_stat.txt stat -liberty ../libs/sky130_fd_sc_hd__tt_025C_1v80.lib
+tee -o reports/synth_area.txt stat -liberty ../libs/sky130_fd_sc_hd__tt_025C_1v80.lib -width
+tee -o reports/synth_timing.txt abc -liberty ../libs/sky130_fd_sc_hd__tt_025C_1v80.lib -print_stats
+
+# Check design
+echo "Checking design..."
+check -noinit
+
+# Write synthesized netlist
+echo "Writing output files..."
+write_verilog -noattr output/temp_ctrl_synthesized.v
+write_verilog -noexpr output/temp_ctrl_synthesized_sim.v
+write_json output/temp_ctrl_synthesized.json
+
+# Write BLIF for further processing
+write_blif output/temp_ctrl_synthesized.blif
+
+# Display final statistics
+echo "============================================="
+echo "Synthesis Complete!"
+echo "============================================="
+stat
+echo "============================================="
+
+# End of script
