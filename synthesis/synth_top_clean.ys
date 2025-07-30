@@ -1,0 +1,49 @@
+# Yosys synthesis script - clean version without echo
+# Target: SKY130 PDK
+
+# Read liberty file
+read_liberty -lib /Users/marcus/Documents/Projects/test-tech/doing/test-eda/fridge_temp_controller_sky130/pdk/ciel/sky130/versions/0fe599b2afb6708d281543108caf8310912f54af/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+
+# Read design files
+read_verilog ../rtl/temp_ctrl_top.v
+read_verilog ../rtl/adc_spi_interface.v
+read_verilog ../rtl/pid_controller.v
+read_verilog ../rtl/pwm_generator.v
+read_verilog ../rtl/display_controller.v
+
+# Elaborate design hierarchy
+hierarchy -check -top temp_ctrl_top
+
+# Generic synthesis
+synth -top temp_ctrl_top
+
+# Flatten design for optimization
+flatten
+
+# Run optimization passes
+opt_expr
+opt_clean
+opt -full
+
+# Technology mapping for SKY130
+dfflibmap -liberty $PDK_PATH/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+abc -liberty $PDK_PATH/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+clean
+
+# Additional optimization after mapping
+opt_clean -purge
+
+# Generate reports
+tee -o reports/synth_stat.txt stat -liberty $PDK_PATH/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+
+# Check design
+check -noinit
+
+# Write synthesized netlist
+write_verilog -noattr output/temp_ctrl_synthesized.v
+write_verilog -noexpr output/temp_ctrl_synthesized_sim.v
+write_json output/temp_ctrl_synthesized.json
+write_blif output/temp_ctrl_synthesized.blif
+
+# Display final statistics
+stat

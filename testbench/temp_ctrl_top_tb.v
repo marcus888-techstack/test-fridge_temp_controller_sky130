@@ -14,7 +14,7 @@ module temp_ctrl_top_tb;
     //==========================================================================
     
     parameter CLK_PERIOD = 100;  // 10 MHz clock (100 ns period)
-    parameter SIM_TIME = 10_000_000;  // 10 ms simulation time
+    parameter SIM_TIME = 100_000_000;  // 100 ms simulation time
     
     //==========================================================================
     // Signal declarations
@@ -111,10 +111,12 @@ module temp_ctrl_top_tb;
         end
     end
     
+    // ADC outputs data on falling edge of SCLK for sampling on next rising edge
     always @(negedge adc_sclk or posedge adc_cs_n) begin
         if (adc_cs_n) begin
             adc_miso <= 1'b0;
         end else begin
+            // ADC128S022 outputs data MSB first starting from bit 11
             case (spi_bit_count)
                 5'd4:  adc_miso <= adc_value[11];
                 5'd5:  adc_miso <= adc_value[10];
@@ -183,11 +185,60 @@ module temp_ctrl_top_tb;
     // Monitor temperature and control signals
     always @(posedge clk) begin
         if (DUT.adc_valid) begin
-            $display("Time: %0t | Temp: %.1f°C | PWM: %d | State: %s", 
+            $display("Time: %0t | Temp: %.1f°C | PWM: %4d | State: %s", 
                      $time, 
                      temperature_celsius,
                      DUT.pwm_duty_cycle,
                      get_state_name(DUT.current_state));
+        end
+    end
+    
+    // Monitor PID controller signals
+    always @(posedge clk) begin
+        if (rst_n && DUT.u_pid.enable) begin
+            $display("PID ENABLED at %0t: comp_en=%b, data_rdy=%b, timer=%d, PID_out=%04X", 
+                     $time,
+                     DUT.compressor_enable,
+                     DUT.temp_data_ready,
+                     DUT.compressor_timer,
+                     DUT.u_pid.pid_out);
+        end
+    end
+    
+    // Monitor compressor timer expiration
+    reg timer_was_nonzero;
+    always @(posedge clk) begin
+        if (rst_n) begin
+            if (timer_was_nonzero && DUT.compressor_timer == 0) begin
+                $display("COMPRESSOR TIMER EXPIRED at %0t", $time);
+            end
+            timer_was_nonzero <= (DUT.compressor_timer != 0);
+        end
+    end
+    
+    // Monitor state changes
+    reg [2:0] prev_state;
+    always @(posedge clk) begin
+        if (rst_n) begin
+            if (DUT.current_state != prev_state) begin
+                $display("STATE CHANGE at %0t: %s -> %s", 
+                         $time,
+                         get_state_name(prev_state),
+                         get_state_name(DUT.current_state));
+                if (DUT.current_state == 3'b100) begin  // ALARM
+                    $display("  ALARM triggered! temp_latched=0x%04X (%0.1f°C), defrost_timer=%d",
+                             DUT.temp_current_latched,
+                             $itor($signed(DUT.temp_current_latched))/256.0,
+                             DUT.defrost_timer);
+                    $display("  Checking: 0x%04X > 0x0A00? %b", 
+                             DUT.temp_current_latched, 
+                             (DUT.temp_current_latched > 16'h0A00));
+                    $display("  Checking: 0x%04X < 0xE700? %b (signed comparison)", 
+                             DUT.temp_current_latched,
+                             ($signed(DUT.temp_current_latched) < $signed(16'hE700)));
+                end
+            end
+            prev_state <= DUT.current_state;
         end
     end
     
@@ -218,13 +269,18 @@ module temp_ctrl_top_tb;
         button_up = 1'b0;
         button_down = 1'b0;
         button_mode = 1'b0;
-        adc_value = 12'd2048;  // 0°C initially
+        adc_value = 12'd2211;  // 4°C initially (matches default setpoint)
         test_case = 0;
         error_count = 0;
         
         // Setup waveform dump
         $dumpfile("temp_ctrl_top_tb.vcd");
         $dumpvars(0, temp_ctrl_top_tb);
+        // Explicitly add key signals for debugging
+        $dumpvars(0, DUT.compressor_enable);
+        $dumpvars(0, DUT.compressor_timer);
+        $dumpvars(0, DUT.temp_data_ready);
+        $dumpvars(0, DUT.u_pid);
         
         // Display header
         $display("\n=====================================");
@@ -236,6 +292,17 @@ module temp_ctrl_top_tb;
         rst_n = 1'b1;
         #(CLK_PERIOD * 10);
         
+        // Check initial state
+        $display("Initial state after reset: %s", get_state_name(DUT.current_state));
+        $display("Initial temp_current_latched: 0x%04X (%0.1f°C)", 
+                 DUT.temp_current_latched, $itor($signed(DUT.temp_current_latched))/256.0);
+        
+        // Wait for system to exit INIT state
+        wait(DUT.current_state != 3'b000);
+        $display("System exited INIT state at time %0t, new state: %s", 
+                 $time, get_state_name(DUT.current_state));
+        #(CLK_PERIOD * 100);  // Small additional delay
+        
         //======================================================================
         // Test Case 1: Basic temperature control
         //======================================================================
@@ -244,11 +311,31 @@ module temp_ctrl_top_tb;
         
         // Set initial temperature above setpoint
         set_temperature(8.0);
-        #(CLK_PERIOD * 20_000);  // Wait for system response
+        
+        // Wait for first ADC reading
+        @(posedge DUT.adc_valid);  // First reading
+        #(CLK_PERIOD * 100_000);  // Wait 10ms
+        
+        // Debug display
+        $display("\nDEBUG at time %0t:", $time);
+        $display("  Temperature: latched=0x%04X (%0.1f°C), setpoint=0x%04X (%0.1f°C)", 
+                 DUT.temp_current_latched, $itor($signed(DUT.temp_current_latched))/256.0,
+                 DUT.temp_setpoint, $itor($signed(DUT.temp_setpoint))/256.0);
+        $display("  Compressor: enable=%b, timer=%d, pwm_duty=%d", 
+                 DUT.compressor_enable, DUT.compressor_timer, DUT.pwm_duty_cycle);
+        $display("  State: current=0x%x (%s)", 
+                 DUT.current_state, get_state_name(DUT.current_state));
+        $display("  Conditions for compressor ON:");
+        $display("    - In NORMAL state? %b", (DUT.current_state == 3'b001));
+        $display("    - Timer expired? %b (timer=%d)", (DUT.compressor_timer == 0), DUT.compressor_timer);
+        $display("    - Temp > setpoint? %b (0x%04X > 0x%04X)", 
+                 (DUT.temp_current_latched > DUT.temp_setpoint),
+                 DUT.temp_current_latched, DUT.temp_setpoint);
+        $display("    - Data ready? %b", DUT.temp_data_ready);
         
         // Temperature should trigger cooling
-        if (compressor_pwm == 1'b0) begin
-            $display("ERROR: Compressor should be ON when temp > setpoint");
+        if (DUT.pwm_duty_cycle == 0) begin
+            $display("ERROR: Compressor should be ON when temp > setpoint (PWM duty = 0)");
             error_count = error_count + 1;
         end
         
@@ -304,12 +391,35 @@ module temp_ctrl_top_tb;
         test_case = 4;
         $display("\n--- Test Case %0d: Temperature Extremes ---", test_case);
         
+        // First add PID debug test
+        $display("\n--- PID Controller Debug ---");
+        // Show PID coefficients
+        $display("PID Coefficients: Kp=0x%04X, Ki=0x%04X, Kd=0x%04X", 
+                 DUT.u_pid.kp, DUT.u_pid.ki, DUT.u_pid.kd);
+        // Set temperature for PID testing
+        set_temperature(8.0);  // Above setpoint to trigger cooling
+        $display("Waiting for compressor timer to expire...");
+        // Wait for timer and show status
+        wait(DUT.compressor_timer == 0);
+        $display("Timer expired. Compressor status:");
+        $display("  compressor_enable=%b", DUT.compressor_enable);
+        $display("  temp_data_ready=%b", DUT.temp_data_ready);
+        $display("  PID enable=%b", DUT.u_pid.enable);
+        $display("  PID output=0x%04X", DUT.u_pid.pid_out);
+        
+        // Wait a bit more to see PID action
+        #(CLK_PERIOD * 100_000);
+        
         // Test high temperature alarm
         set_temperature(15.0);
-        #(CLK_PERIOD * 20_000);
+        @(posedge DUT.adc_valid);  // Wait for ADC reading
+        #(CLK_PERIOD * 1000);      // Small delay
         
         if (alarm != 1'b1) begin
             $display("ERROR: High temperature alarm not triggered");
+            $display("  Current state: %s", get_state_name(DUT.current_state));
+            $display("  Temp: 0x%04X (%0.1f°C)", 
+                     DUT.temp_current_latched, $itor($signed(DUT.temp_current_latched))/256.0);
             error_count = error_count + 1;
         end
         
@@ -319,10 +429,14 @@ module temp_ctrl_top_tb;
         
         // Test low temperature
         set_temperature(-25.0);
-        #(CLK_PERIOD * 20_000);
+        @(posedge DUT.adc_valid);  // Wait for ADC reading
+        #(CLK_PERIOD * 1000);      // Small delay
         
         if (alarm != 1'b1) begin
             $display("ERROR: Low temperature alarm not triggered");
+            $display("  Current state: %s", get_state_name(DUT.current_state));
+            $display("  Temp: 0x%04X (%0.1f°C)", 
+                     DUT.temp_current_latched, $itor($signed(DUT.temp_current_latched))/256.0);
             error_count = error_count + 1;
         end
         

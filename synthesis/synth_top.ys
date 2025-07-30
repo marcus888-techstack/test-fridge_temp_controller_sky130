@@ -6,74 +6,132 @@
 # Date: 2024-12-19
 # ==============================================================================
 
+# 顯示合成開始標題
 # Display banner
 echo "============================================="
 echo "Temperature Controller Synthesis"
 echo "Target: SKY130 PDK"
 echo "============================================="
 
-# Read liberty file for SKY130
-# Note: Path needs to be updated based on actual PDK installation
-read_liberty -lib ../libs/sky130_fd_sc_hd__tt_025C_1v80.lib
+# 設定 PDK 路徑變數，指向 Sky130 PDK 的安裝位置
+# Set PDK path variable pointing to Sky130 PDK installation
+set PDK_PATH /Users/marcus/Documents/Projects/test-tech/doing/test-eda/fridge_temp_controller_sky130/pdk/ciel/sky130/versions/0fe599b2afb6708d281543108caf8310912f54af/sky130A
 
+# 讀取 Liberty 格式的標準單元庫檔案
+# Liberty 檔案包含了每個標準單元的時序、功耗和面積資訊
+# tt_025C_1v80 表示：typical-typical 製程角、25°C 溫度、1.8V 電壓
+# Read liberty file for SKY130 standard cells
+read_liberty -lib $PDK_PATH/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+
+# 讀取所有 RTL Verilog 設計檔案
+# 這些是我們要合成的硬體描述語言原始碼
 # Read design files
 echo "Reading RTL files..."
-read_verilog ../rtl/temp_ctrl_top.v
-read_verilog ../rtl/adc_spi_interface.v
-read_verilog ../rtl/pid_controller.v
-read_verilog ../rtl/pwm_generator.v
-read_verilog ../rtl/display_controller.v
+read_verilog ../rtl/temp_ctrl_top.v        # 頂層模組：溫度控制器主控制器
+read_verilog ../rtl/adc_spi_interface.v    # ADC SPI 介面模組
+read_verilog ../rtl/pid_controller.v       # PID 控制器模組
+read_verilog ../rtl/pwm_generator.v        # PWM 產生器模組
+read_verilog ../rtl/display_controller.v   # 七段顯示器控制器模組
 
+# 展開設計階層，檢查所有模組是否正確連接
+# -check: 檢查是否有未定義的模組
+# -top: 指定頂層模組名稱
 # Elaborate design hierarchy
 echo "Elaborating design..."
 hierarchy -check -top temp_ctrl_top
 
+# 執行通用合成流程
+# 這會將 RTL 轉換成邏輯閘級的表示
+# synth 命令包含了多個子步驟：
+# - 高階合成 (high-level synthesis)
+# - FSM 提取和優化
+# - 記憶體推斷
+# - 算術運算優化
 # Generic synthesis
 echo "Running synthesis..."
 synth -top temp_ctrl_top
 
+# 將階層化設計展平成單一層級
+# 這樣可以進行跨模組邊界的優化
 # Flatten design for optimization
 flatten
 
+# 執行各種優化步驟
 # Run optimization passes
 echo "Optimizing design..."
-opt_expr
-opt_clean
-opt -full
+opt_expr    # 優化常數運算式 (constant expression optimization)
+opt_clean   # 移除未使用的線路和單元 (remove unused wires and cells)
+opt -full   # 執行完整優化流程 (full optimization pass)
 
+# 技術映射階段 - 將通用邏輯映射到 Sky130 標準單元
 # Technology mapping for SKY130
 echo "Technology mapping..."
-dfflibmap -liberty ../libs/sky130_fd_sc_hd__tt_025C_1v80.lib
-abc -liberty ../libs/sky130_fd_sc_hd__tt_025C_1v80.lib -constr constraints.sdc
+
+# 將通用的觸發器 (flip-flops) 映射到 Sky130 的標準單元庫
+# 這會選擇適當的 D 觸發器、鎖存器等順序邏輯元件
+dfflibmap -liberty $PDK_PATH/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+
+# 使用 ABC 工具進行組合邏輯優化和映射
+# ABC 是業界標準的邏輯合成和優化工具
+# -liberty: 指定目標標準單元庫
+# -constr: 指定時序約束檔案 (SDC 格式)
+abc -liberty $PDK_PATH/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib -constr constraints.sdc
+
+# 清理映射後的設計
 clean
 
+# 映射後的額外優化
+# -purge: 積極移除未使用的邏輯
 # Additional optimization after mapping
 opt_clean -purge
 
+# 產生各種報告檔案
 # Generate reports
 echo "Generating reports..."
-tee -o reports/synth_stat.txt stat -liberty ../libs/sky130_fd_sc_hd__tt_025C_1v80.lib
-tee -o reports/synth_area.txt stat -liberty ../libs/sky130_fd_sc_hd__tt_025C_1v80.lib -width
-tee -o reports/synth_timing.txt abc -liberty ../libs/sky130_fd_sc_hd__tt_025C_1v80.lib -print_stats
 
+# 產生統計報告：顯示使用的標準單元數量和類型
+# tee -o: 同時輸出到檔案和終端機
+tee -o reports/synth_stat.txt stat -liberty $PDK_PATH/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+
+# 產生面積報告：顯示設計的總面積和各單元的面積分布
+tee -o reports/synth_area.txt stat -liberty $PDK_PATH/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib -width
+
+# 產生時序報告：顯示關鍵路徑延遲等時序資訊
+tee -o reports/synth_timing.txt abc -liberty $PDK_PATH/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib -print_stats
+
+# 檢查合成後的設計是否有錯誤
+# -noinit: 不檢查初始值（因為合成會處理這些）
 # Check design
 echo "Checking design..."
 check -noinit
 
+# 輸出合成後的網表檔案
 # Write synthesized netlist
 echo "Writing output files..."
+
+# 產生 Verilog 網表（用於後續 APR 流程）
+# -noattr: 不包含屬性資訊，讓網表更簡潔
 write_verilog -noattr output/temp_ctrl_synthesized.v
+
+# 產生用於模擬的 Verilog 網表
+# -noexpr: 展開所有運算式，適合模擬器使用
 write_verilog -noexpr output/temp_ctrl_synthesized_sim.v
+
+# 產生 JSON 格式的網表（用於其他 EDA 工具）
 write_json output/temp_ctrl_synthesized.json
 
+# 產生 BLIF 格式檔案（Berkeley Logic Interchange Format）
+# 這是許多學術工具使用的標準格式
 # Write BLIF for further processing
 write_blif output/temp_ctrl_synthesized.blif
 
+# 顯示最終的設計統計資訊
 # Display final statistics
 echo "============================================="
 echo "Synthesis Complete!"
 echo "============================================="
-stat
+stat    # 顯示閘數、觸發器數量、線路數等統計資訊
 echo "============================================="
 
+# 合成腳本結束
 # End of script

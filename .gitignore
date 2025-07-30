@@ -1,0 +1,159 @@
+# ==============================================================================
+# ASIC Design Project .gitignore
+# Fridge Temperature Controller - Sky130 PDK
+# ==============================================================================
+
+# OpenLane Build Artifacts
+# ========================
+openlane/runs/*/
+openlane/gds_preview/
+openlane/.openlane_config
+openlane/*.log
+
+# PDK and Library Files (Large files that should be managed separately)
+# ====================================================================
+pdk/
+lib/
+*.lib
+*.lef
+merged*.lef
+trimmed*.lib
+*.db
+*.liberty
+
+# Simulation Files
+# ===============
+*.vcd
+*.fst
+*.vvp
+*.out
+*.dump
+work/
+testbench/work/
+simv*
+csrc/
+ucli.key
+*.vpd
+*.fsdb
+*.tr0
+*.dsn
+*.history
+.synopsys_*
+
+# Synthesis and P&R Temporary Files
+# =================================
+*.log
+*.rpt
+*.tmp
+*.temp
+synthesis_temp/
+pnr_temp/
+*.def
+*.odb
+*.sdc
+*.spef
+*.sdf
+*.v.bak
+
+# Tool-specific Files
+# ==================
+# Yosys
+*.blif
+*.edif
+*.json
+hierarchy.dot
+post_techmap.dot
+
+# Magic
+*.ext
+*.mag
+*.sim
+*.nodes
+*.res
+*.cap
+*.sub
+
+# KLayout
+*.lyp
+*.lyt
+
+# OpenSTA/OpenTimer
+*.db
+*.timing
+
+# Cadence
+*.cdl
+*.calibre*
+*.drc*
+*.lvs*
+*.pex*
+
+# System and Editor Files
+# =======================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.sublime-*
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+*~
+core
+
+# Build directories
+build/
+dist/
+*.egg-info/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Documentation build
+docs/_build/
+docs/.doctrees/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environment variables
+.env
+.venv
+env/
+venv/
+
+# ==============================================================================
+# Keep These Important Files (explicitly track despite patterns above)
+# ==============================================================================
+!rtl/*.v
+!rtl/*.sv
+!testbench/*.v
+!testbench/*.sv
+!openlane/config.json
+!openlane/base.sdc
+!openlane/pdn.tcl
+!openlane/pin_order.cfg
+!openlane/*.md
+!openlane/*.sh
+!docs/
+!scripts/
+!README*
+!Makefile
+!*.yml
+!*.yaml

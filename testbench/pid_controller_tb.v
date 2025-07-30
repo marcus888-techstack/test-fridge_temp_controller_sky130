@@ -51,7 +51,7 @@ module pid_controller_tb;
         .kp       (kp),
         .ki       (ki),
         .kd       (kd),
-        .output   (output_pid)
+        .pid_out  (output_pid)
     );
     
     //==========================================================================

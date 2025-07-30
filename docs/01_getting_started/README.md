@@ -8,6 +8,7 @@
 |------|------|------------|
 | [00_design_introduction_for_beginners.md](00_design_introduction_for_beginners.md) | IC 設計入門介紹 | 30 分鐘 |
 | [01_system_specification.md](01_system_specification.md) | 系統規格與需求定義 | 20 分鐘 |
+| [development_environment_setup.md](development_environment_setup.md) | 開發環境安裝指南 | 45 分鐘 |
 
 ## 🎯 學習目標
 

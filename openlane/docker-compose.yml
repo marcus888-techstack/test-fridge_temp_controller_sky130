@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  openlane:
+    image: efabless/openlane:latest
+    container_name: temp_controller_openlane
+    environment:
+      - PDK=sky130A
+      - DESIGN_NAME=temp_ctrl_top
+      - OPENLANE_IMAGE_NAME=efabless/openlane:latest
+    volumes:
+      - ..:/openlane/designs/temp_controller
+      - ~/.volare:/home/tool/.volare
+      - openlane_pdk:/pdk
+    working_dir: /openlane
+    stdin_open: true
+    tty: true
+    command: >
+      bash -c "
+        echo '===================================='
+        echo 'OpenLane Docker Environment Ready'
+        echo '===================================='
+        echo ''
+        echo 'Quick commands:'
+        echo '1. Automatic flow:'
+        echo '   ./flow.tcl -design /openlane/designs/temp_controller/openlane -tag run_\$(date +%Y%m%d_%H%M%S)'
+        echo ''
+        echo '2. Interactive flow:'
+        echo '   ./flow.tcl -interactive'
+        echo '   package require openlane 0.9'
+        echo '   prep -design /openlane/designs/temp_controller/openlane'
+        echo '   run_synthesis'
+        echo '   run_floorplan'
+        echo '   run_placement'
+        echo '   run_cts'
+        echo '   run_routing'
+        echo '   run_magic'
+        echo ''
+        echo '3. Exit: exit or Ctrl+D'
+        echo '===================================='
+        echo ''
+        echo 'Current directory: ' \$(pwd)
+        echo 'Design directory: /openlane/designs/temp_controller/openlane'
+        echo ''
+        bash
+      "
+
+volumes:
+  openlane_pdk:
+    name: openlane_pdk_sky130
